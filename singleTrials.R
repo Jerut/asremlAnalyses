@@ -80,9 +80,7 @@ singleTrials<- function(dat=dat, ped=ped, trialvar='study', designvar='Design',
   
   #AIC function
   AIC<- function(m){
-    sm<- summary(m)$varcomp
-    nvar<- nrow(sm)+ length(as.vector(coefficients(m)$fixed))
-    aic<- -2*summary(m)$loglik+ nvar*2
+    aic<- summary(m)$aic[1]
     return(aic)
   }
   
@@ -242,7 +240,7 @@ singleTrials<- function(dat=dat, ped=ped, trialvar='study', designvar='Design',
     modinfo<- data.frame(study= ustud[i], fixed, random, residual=resid)
     
     #get blups and predicted values
-    pv<- predict(model, classify='mgid')
+    pv<- predict(model, classify='mgid', levels= list(mgid=trial$mgid))
     predtab<- pv$pvals
     rcf<- model$coef$random
     EBVs<- rcf[grep('mgid', row.names(rcf)),]
