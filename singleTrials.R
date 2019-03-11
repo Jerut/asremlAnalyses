@@ -108,6 +108,8 @@ singleTrials<- function(dat=dat, ped=ped, trialvar='study', designvar='Design',
       if(nrow(trial)>nrow(rc) ){
         hascoord=FALSE
       }
+    }else{
+      hascoord=FALSE
     }
     if(hascoord){
       trial$row<- as.factor(trial$row)
