@@ -240,7 +240,7 @@ singleTrials<- function(dat=dat, ped=ped, trialvar='study', designvar='Design',
     modinfo<- data.frame(study= ustud[i], fixed, random, residual=resid)
     
     #get blups and predicted values
-    pv<- predict(model, classify='mgid', levels= list(mgid=trial$mgid))
+    pv<- predict(model, classify='mgid', levels= list(mgid=unique(trial$mgid)))
     predtab<- pv$pvals
     rcf<- model$coef$random
     EBVs<- rcf[grep('mgid', row.names(rcf)),]
