@@ -41,10 +41,7 @@ singleTrials<- function(dat=dat, ped=ped, trialvar='study', designvar='Design',
     return(dat)
   }
 
-  #remove imlausable values 
-  if(length(which(dat$TOI<lwrlim))>0){dat[which(dat$TOI>uprlim),'TOI']<- NA}
-  if(length(which(dat$TOI<lwrlim))>0){dat[which(dat$TOI<lwrlim),'TOI']<- NA}
-  
+
   #modify column names for rep, design, missing hill, and id variables
   dat<- modcol(dat, missingHillsvar, 'missinghills')
   dat<- modcol(dat, idvar, 'mgid')
@@ -74,6 +71,11 @@ singleTrials<- function(dat=dat, ped=ped, trialvar='study', designvar='Design',
   TOI<- dat[,trait]
   dat<- data.frame(dat, TOI)
   dat$mgid<- as.character(dat$mgid)
+  
+  #remove imlausable values 
+  if(length(which(dat$TOI<lwrlim))>0){dat[which(dat$TOI>uprlim),'TOI']<- NA}
+  if(length(which(dat$TOI<lwrlim))>0){dat[which(dat$TOI<lwrlim),'TOI']<- NA}
+  
   
   #set asreml options
   asreml.options(maxit=100,pworkspace=pworkspace, workspace=workspace)
