@@ -260,7 +260,7 @@ singleTrials<- function(dat=dat, ped=ped, trialvar='study', designvar='Design',
     Reliability<- 1-PEV/Vgs
     
     #Get table of values
-    rslts<- data.frame(study= ustud[i], predtab, EBVs=EBVs[predtab$mgid], Reliability)
+    rslts<- data.frame(study= ustud[i], predtab, EBVs=EBVs[predtab$mgid], Reliability, obsNo=1:nrow(predtab))
     
     #average reliability
     h2<- mean(Reliability)
