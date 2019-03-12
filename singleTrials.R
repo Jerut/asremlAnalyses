@@ -315,14 +315,14 @@ singleTrials<- function(dat=dat, ped=ped, trialvar='study', designvar='Design',
       modinfo_all<- modinfo
       if(saveModobj){
         model_objects<- list()
-        model_objects[i]<- model
+        model_objects[[i]]<- model
       }
     }else{
       trial_all<- rbind(trial_all, trial)
       results_all<- rbind(results_all, rslts)
       modinfo_all<- rbind(modinfo_all, modinfo)
       if(saveModobj){
-        model_objects[i]<- model
+        model_objects[[i]]<- model
       }
     }
   }#END of trial by trial loop
