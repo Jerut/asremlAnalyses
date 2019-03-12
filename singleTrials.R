@@ -213,7 +213,8 @@ singleTrials<- function(dat=dat, ped=ped, trialvar='study', designvar='Design',
     modobjs<- list()
     for(j in 1:length(fxobjs)){
       for(k in 1:length(rndobjs)){
-        m<- asreml(fixed=fxobjs[[j]], random= rndobjs[[k]], data=trial)
+        m<- asreml(fixed=fxobjs[[j]], random= rndobjs[[k]], data=trial,
+                   na.action = na.method(x = "include"))
         
         #update until convergence
         counter<- 0
