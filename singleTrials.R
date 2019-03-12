@@ -288,7 +288,7 @@ singleTrials<- function(dat=dat, ped=ped, trialvar='study', designvar='Design',
     
     #Get table of values
     if(!is.null(ped)){
-      rslts<- data.frame(study= ustud[i], predtab, Reliability, trial.mean, F=I[predtab$mgid], obsNo=1:nrow(predtab))
+      rslts<- data.frame(study= ustud[i], predtab, Reliability, trial.mean, F=I[match(predtab$mgid, p$label)], obsNo=1:nrow(predtab))
     }else{
       rslts<- data.frame(study= ustud[i], predtab, Reliability, trial.mean, obsNo=1:nrow(predtab))
     }
