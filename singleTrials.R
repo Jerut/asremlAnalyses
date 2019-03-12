@@ -326,6 +326,7 @@ singleTrials<- function(dat=dat, ped=ped, trialvar='study', designvar='Design',
       }
     }
   }#END of trial by trial loop
+  
   if(saveModobj){
     return(list(trial_all=trial_all,results_all=results_all, modinfo_all=modinfo_all, 
               model_objects=model_objects))
