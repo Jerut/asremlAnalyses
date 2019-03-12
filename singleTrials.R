@@ -255,10 +255,7 @@ singleTrials<- function(dat=dat, ped=ped, trialvar='study', designvar='Design',
     
     #get selected model formula info
     resid<- paste(as.character(unlist(model$formulae$residual)), collapse="")
-    fixed<- paste(as.character(unlist(model$formulae$fixed))[-c(1:3)], collapse="+")
-    if(fixed==""){
-      fixed="TOI~1"
-    }
+    fixed<- paste(as.character(unlist(model$formulae$fixed))[c(2,1,3)], collapse=" ")
     random<- paste(as.character(unlist(model$formulae$random)), collapse="")
     modinfo<- data.frame(study= ustud[i], fixed, random, residual=resid)
     
