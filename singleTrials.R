@@ -145,6 +145,7 @@ singleTrials<- function(dat=dat, ped=ped, trialvar='study', designvar='Design',
     pcthasmiss<- length(which(trial$missinghills>0))/nrow(trial)
     if(pcthasmiss>.2){
       useMHcovar=TRUE #if more than 20% of plots are affected use a covariate
+      trial$missinghills<- trial$missinghills- mean(trial$missinghills, na.rm=T)
     }else{
       useMHcovar=FALSE
     }
@@ -212,6 +213,7 @@ singleTrials<- function(dat=dat, ped=ped, trialvar='study', designvar='Design',
     
     #----Fit models and save a list of objects
     modobjs<- list()
+    numb<-0
     for(j in 1:length(fxobjs)){
       for(k in 1:length(rndobjs)){
         m<- asreml(fixed=fxobjs[[j]], random= rndobjs[[k]], data=trial,
@@ -223,14 +225,13 @@ singleTrials<- function(dat=dat, ped=ped, trialvar='study', designvar='Design',
           counter<- counter+1
           m<- update(m)
         }
-        
-        modobjs[[(j*k)]]<- m
+        numb<- numb+1
+        modobjs[[numb]]<- m
       }
     }
     
     #------ fit spatial models if coordinate data are avaliable
     if(hascoord){
-      numb<-length(modobjs)
       for(l in 1:length(modobjs)){
         for(n in 1:length(Robjs)){
           m<- modobjs[[l]]
