@@ -109,15 +109,13 @@ singleTrials<- function(dat=dat, ped=ped, trialvar='study', designvar='Design',
       expecrow<- rep(c(mnrow:mxrow), length(mncol:mxcol))
       expeccol<- sort(rep(c(mncol:mxcol), length(mnrow:mxrow)))
       rc<- data.frame(row=expecrow, col=expeccol)
-      if(nrow(trial)!=nrow(rc) ){
-        hascoord=FALSE
-      }else{
-        trial<- merge(rc, trial, by=c('row', 'col'), all=TRUE, sort=FALSE) 
+      trial2<- merge(rc, trial, by=c('row', 'col'), all=TRUE, sort=FALSE) 
+      if(nrow(trial2) =! nrow(trial)){
+        hascoord<- FALSE
       }
     }else{
       hascoord=FALSE
     }
-    
     
     if(hascoord){
       trial$row<- as.factor(trial$row)
