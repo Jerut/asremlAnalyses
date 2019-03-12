@@ -112,6 +112,8 @@ singleTrials<- function(dat=dat, ped=ped, trialvar='study', designvar='Design',
       trial2<- merge(rc, trial, by=c('row', 'col'), all=TRUE, sort=FALSE) 
       if(nrow(trial2)!=nrow(trial)){
         hascoord<- FALSE
+      }else{
+        trial<- trial2
       }
     }else{
       hascoord=FALSE
