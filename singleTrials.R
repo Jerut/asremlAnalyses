@@ -272,7 +272,6 @@ singleTrials<- function(dat=dat, ped=ped, trialvar='study', designvar='Design',
       p<- pedigreemm::editPed(ped_sub[,2], ped_sub[,3],ped_sub[,1])
       P<- pedigreemm::pedigree(p[,2], p[,3],p[,1])
       I<- pedigreemm::inbreeding(P)
-      names(I)<- p[,1]
     }
     
     #calculate reliability
@@ -280,13 +279,12 @@ singleTrials<- function(dat=dat, ped=ped, trialvar='study', designvar='Design',
     vc<- summary(model)$varcomp
     if(!is.null(ped)){
       Vg<- vc[match('vm(mgid, ainv)', row.names(vc)),'component']
-      Vgs<- Vg
-      Vgs<- Vg*(I[predtab$mgid]+1)
+      Vgs<- Vg*(I[match(predtab$mgid, p$label)]+1)
     }else{
       Vg<- vc[match('mgid', row.names(vc)),'component']
       Vgs<- Vg
     }
-    Reliability<- 1-PEV/Vgs
+    Reliability<- 1-(PEV/Vgs)
     
     #Get table of values
     if(!is.null(ped)){
