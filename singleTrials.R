@@ -282,13 +282,15 @@ singleTrials<- function(dat=dat, ped=ped, trialvar='study', designvar='Design',
       Vg<- vc[match('vm(mgid, ainv)', row.names(vc)),'component']
       Vgs<- Vg*I[predtab$mgid]+1
     }else{
-      Vgs<- vc[match('mgid', row.names(vc)),'component']
+      Vg<- vc[match('mgid', row.names(vc)),'component']
+      Vgs<- Vg
     }
     Reliability<- 1-PEV/Vgs
     
     #Get table of values
     if(!is.null(ped)){
-      rslts<- data.frame(study= ustud[i], predtab, Reliability, trial.mean, obsNo=1:nrow(predtab))
+      rslts<- data.frame(study= ustud[i], predtab, Reliability, trial.mean, 
+                         Icoef=I[predtab$mgid], obsNo=1:nrow(predtab))
     }else{
       rslts<- data.frame(study= ustud[i], predtab, Reliability, trial.mean, obsNo=1:nrow(predtab))
     }
@@ -297,7 +299,7 @@ singleTrials<- function(dat=dat, ped=ped, trialvar='study', designvar='Design',
     h2<- mean(Reliability)
     
     #add to modinfo
-    modinfo<- data.frame(modinfo, h2, trial.mean)
+    modinfo<- data.frame(modinfo, h2, trial.mean, Vg)
     cat(h2, "\n")
     
     #save studentized residuals
