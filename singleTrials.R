@@ -110,7 +110,7 @@ singleTrials<- function(dat=dat, ped=ped, trialvar='study', designvar='Design',
       expeccol<- sort(rep(c(mncol:mxcol), length(mnrow:mxrow)))
       rc<- data.frame(row=expecrow, col=expeccol)
       trial2<- merge(rc, trial, by=c('row', 'col'), all=TRUE, sort=FALSE) 
-      if(nrow(trial2) =! nrow(trial)){
+      if(nrow(trial2) != nrow(trial)){
         hascoord<- FALSE
       }
     }else{
