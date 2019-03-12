@@ -268,19 +268,20 @@ singleTrials<- function(dat=dat, ped=ped, trialvar='study', designvar='Design',
     trial.mean<- pvI$pvals$predicted.value
     
     #get inbreeding coefficients
-    if(!is.null(ped)){
-      p<- pedigreemm::editPed(ped_sub[,2], ped_sub[,3],ped_sub[,1])
-      P<- pedigreemm::pedigree(p[,2], p[,3],p[,1])
-      I<- pedigreemm::inbreeding(P)
-      names(I)<- p[,1]
-    }
+   # if(!is.null(ped)){
+   #   p<- pedigreemm::editPed(ped_sub[,2], ped_sub[,3],ped_sub[,1])
+   #   P<- pedigreemm::pedigree(p[,2], p[,3],p[,1])
+   #   I<- pedigreemm::inbreeding(P)
+   #   names(I)<- p[,1]
+    #}
     
     #calculate reliability
     PEV<- predtab$std.error^2
     vc<- summary(model)$varcomp
     if(!is.null(ped)){
       Vg<- vc[match('vm(mgid, ainv)', row.names(vc)),'component']
-      Vgs<- Vg*I[predtab$mgid]+1
+      Vgs<- Vg
+      #Vgs<- Vg*I[predtab$mgid]+1
     }else{
       Vg<- vc[match('mgid', row.names(vc)),'component']
       Vgs<- Vg
@@ -289,8 +290,7 @@ singleTrials<- function(dat=dat, ped=ped, trialvar='study', designvar='Design',
     
     #Get table of values
     if(!is.null(ped)){
-      rslts<- data.frame(study= ustud[i], predtab, Reliability, trial.mean, 
-                         Icoef=I[predtab$mgid], obsNo=1:nrow(predtab))
+      rslts<- data.frame(study= ustud[i], predtab, Reliability, trial.mean, obsNo=1:nrow(predtab))
     }else{
       rslts<- data.frame(study= ustud[i], predtab, Reliability, trial.mean, obsNo=1:nrow(predtab))
     }
