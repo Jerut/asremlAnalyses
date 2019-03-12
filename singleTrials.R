@@ -47,6 +47,7 @@ singleTrials<- function(dat=dat, ped=ped, trialvar='study', designvar='Design',
   dat<- modcol(dat, idvar, 'mgid')
   dat<- modcol(dat, rep_var, 'rep')
   dat<- modcol(dat, designvar, 'Design')
+  dat<- modcol(dat, trialvar, 'study')
   
   #rename column names for blocks
   dat<- modcol(dat, colblk_var, 'colB')
@@ -91,8 +92,12 @@ singleTrials<- function(dat=dat, ped=ped, trialvar='study', designvar='Design',
   for(i in 1:length(ustud)){
     
     #-------subset trial
-    ix<- which(dat$study==ustud[i])
-    trial<- droplevels.data.frame(dat[ix,])    
+    if(length(ustud)>1){
+      ix<- which(dat$study==ustud[i])
+      trial<- droplevels.data.frame(dat[ix,]) 
+    }else{
+      trial<- droplevels.data.frame(dat) 
+    }
 
     #-------Fix the row-col coordinates if they exist
     hascoord<- TRUE
@@ -117,13 +122,13 @@ singleTrials<- function(dat=dat, ped=ped, trialvar='study', designvar='Design',
     }
     
     #---------get rep info
-    if(length(na.omit(trial$row))>0){
+    if(length(na.omit(trial$rep))>0){
       trial$rep<- as.character(trial$rep)
       trial$rep<- as.factor(trial$rep)
       tb<- table(trial$rep)
       repratio<- paste(tb, collapse=":")
       rep_pct_diff<- abs(tb-max(tb))/max(tb)
-      if(length(which(rep_pct_diff>0.2))>0){
+      if(length(which(rep_pct_diff>0.25))>0){
         rep_problem<- TRUE
       }else{
         rep_problem<- FALSE
@@ -141,9 +146,11 @@ singleTrials<- function(dat=dat, ped=ped, trialvar='study', designvar='Design',
     }
     
     #----------get Ainverse
-    ped_sub<- nadiv::prunePed(ped, phenotyped=trial$mgid)
-    ainv<- asreml::ainverse(ped_sub)
-    assign("ainv", ainv, envir = .GlobalEnv) 
+    if(!is.null(ped)){
+      ped_sub<- suppressWarnings(nadiv::prunePed(ped, phenotyped=trial$mgid))
+      ainv<- asreml::ainverse(ped_sub)
+      assign("ainv", ainv, envir = .GlobalEnv) 
+    }
 
     #set mgid to factor
     trial$mgid<- as.factor(trial$mgid)
@@ -161,25 +168,31 @@ singleTrials<- function(dat=dat, ped=ped, trialvar='study', designvar='Design',
     
     #-----assemble the random part of the formula
     rndobjs<- list()
-    rndobjs[1]<-  '~vm(mgid, ainv)'
-    
-    #if there are row and column blocks
-    if(trial[1,designvar]=='P-REP' | trial[1,designvar]=='Row-Column'){
-      rndobjs[2]<-  paste(rndobjs[1], 'rowB', sep="+")
-      rndobjs[3]<-  paste(rndobjs[1], 'colB', sep="+")
-      rndobjs[4]<-  paste(rndobjs[2], 'colB', sep="+")
-      
-      if(!rep_problem){
-        rndobjs[5]<-  paste(rndobjs[1], 'rowB:rep', sep="+")
-        rndobjs[6]<-  paste(rndobjs[1], 'colB:rep', sep="+")
-        rndobjs[7]<-  paste(rndobjs[5], 'colB:rep', sep="+")
-      }
+    if(is.null(ped)){
+      rndobjs[1]<-  '~mgid'
+    }else{
+      rndobjs[1]<-  '~vm(mgid, ainv)'
     }
     
-    #if the design is alpha-lattice
-    if(trial[1,designvar]=='Alpha-Lattice' | trial[1,designvar]=='Augmented Alpha-Lattice'){
-      if(!rep_problem){
-        rndobjs[3]<-  paste(rndobjs[1], 'block:rep', sep="+")
+    #if design is known
+    if(!is.na(trial[1,'Design'])){
+      #if there are row and column blocks
+      if(trial[1,'Design']=='P-REP' | trial[1,'Design']=='Row-Column'){
+        rndobjs[2]<-  paste(rndobjs[1], 'rowB', sep="+")
+        rndobjs[3]<-  paste(rndobjs[1], 'colB', sep="+")
+        rndobjs[4]<-  paste(rndobjs[2], 'colB', sep="+")
+        
+        if(!rep_problem){
+          rndobjs[5]<-  paste(rndobjs[1], 'rowB:rep', sep="+")
+          rndobjs[6]<-  paste(rndobjs[1], 'colB:rep', sep="+")
+          rndobjs[7]<-  paste(rndobjs[5], 'colB:rep', sep="+")
+        }
+      }
+      #if the design is alpha-lattice
+      if(trial[1,'Design']=='Alpha-Lattice' | trial[1,'Design']=='Augmented Alpha-Lattice'){
+        if(!rep_problem){
+          rndobjs[3]<-  paste(rndobjs[1], 'block:rep', sep="+")
+        }
       }
     }
     rndobjs<- lapply(rndobjs, as.formula)
@@ -244,33 +257,44 @@ singleTrials<- function(dat=dat, ped=ped, trialvar='study', designvar='Design',
     modinfo<- data.frame(study= ustud[i], fixed, random, residual=resid)
     
     #get blups and predicted values
-    pv<- predict(model, classify='mgid', levels= list(mgid=unique(trial$mgid)))
+    pv<- predict(model, classify='mgid', levels= list(mgid=unique(trial$mgid)),only=c('mgid'))
     predtab<- pv$pvals
-    rcf<- model$coef$random
-    EBVs<- rcf[grep('mgid', row.names(rcf)),]
-    names(EBVs)<- as.character(matrix(unlist(strsplit(names(EBVs), split="_")), nrow=2)[2,])
+    
+    #get trial mean
+    pvI<- predict(model, classify='(Intercept)', levels= list(mgid=unique(trial$mgid)))
+    trial.mean<- pvI$pvals$predicted.value
     
     #get inbreeding coefficients
-    p<- pedigreemm::editPed(ped_sub[,2], ped_sub[,3],ped_sub[,1])
-    P<- pedigreemm::pedigree(p[,2], p[,3],p[,1])
-    I<- pedigreemm::inbreeding(P)
-    names(I)<- p[,1]
+    if(!is.null(ped)){
+      p<- pedigreemm::editPed(ped_sub[,2], ped_sub[,3],ped_sub[,1])
+      P<- pedigreemm::pedigree(p[,2], p[,3],p[,1])
+      I<- pedigreemm::inbreeding(P)
+      names(I)<- p[,1]
+    }
     
     #calculate reliability
     PEV<- predtab$std.error^2
     vc<- summary(model)$varcomp
-    Vg<- vc[match('vm(mgid, ainv)', row.names(vc)),'component']
-    Vgs<- Vg*I[predtab$mgid]+1
+    if(!is.null(ped)){
+      Vg<- vc[match('vm(mgid, ainv)', row.names(vc)),'component']
+      Vgs<- Vg*I[predtab$mgid]+1
+    }else{
+      Vgs<- vc[match('mgid', row.names(vc)),'component']
+    }
     Reliability<- 1-PEV/Vgs
     
     #Get table of values
-    rslts<- data.frame(study= ustud[i], predtab, EBVs=EBVs[predtab$mgid], Reliability, obsNo=1:nrow(predtab))
+    if(!is.null(ped)){
+      rslts<- data.frame(study= ustud[i], predtab, Reliability, trial.mean, obsNo=1:nrow(predtab))
+    }else{
+      rslts<- data.frame(study= ustud[i], predtab, Reliability, trial.mean, obsNo=1:nrow(predtab))
+    }
     
     #average reliability
     h2<- mean(Reliability)
     
     #add to modinfo
-    modinfo<- data.frame(modinfo, h2)
+    modinfo<- data.frame(modinfo, h2, trial.mean)
     cat(h2, "\n")
     
     #save trial data as is and results table
