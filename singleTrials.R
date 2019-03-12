@@ -29,7 +29,8 @@ singleTrials<- function(dat=dat, ped=ped, trialvar='study', designvar='Design',
                         idvar= 'mgid', missingHillsvar= 'missinghills', 
                         rep_var='rep', colblk_var='col', 
                         rowblk_var= 'row', blk_var=NULL, colcoord_var='col', 
-                        rowcoord_var='row', workspace='2gb', pworkspace='2gb'){
+                        rowcoord_var='row', workspace='2gb', pworkspace='2gb',
+                        saveModobj=TRUE){
   require(asreml)
   require(pedigreemm)
   require(nadiv)
@@ -79,7 +80,7 @@ singleTrials<- function(dat=dat, ped=ped, trialvar='study', designvar='Design',
   
   
   #set asreml options
-  asreml.options(maxit=100,pworkspace=pworkspace, workspace=workspace)
+  asreml.options(maxit=100, pworkspace=pworkspace, workspace=workspace, aom=T)
   
   #AIC function
   AIC<- function(m){
@@ -301,16 +302,34 @@ singleTrials<- function(dat=dat, ped=ped, trialvar='study', designvar='Design',
     modinfo<- data.frame(modinfo, h2, trial.mean)
     cat(h2, "\n")
     
+    #save studentized residuals
+    stdresid<- model$aom$R[,"stdCondRes"]
+    ndf<- model$nedf
+    studRes<-  stdresid/sqrt((ndf - stdresid^2)/(ndf - 1) ) 
+    trial<- data.frame(trial, studentized.residuals=studRes)
+    
     #save trial data as is and results table
     if(i==1){
       trial_all<- trial
       results_all<- rslts
       modinfo_all<- modinfo
+      if(saveModobj){
+        model_objects<- list()
+        model_objects[i]<- model
+      }
     }else{
       trial_all<- rbind(trial_all, trial)
       results_all<- rbind(results_all, rslts)
       modinfo_all<- rbind(modinfo_all, modinfo)
+      if(saveModobj){
+        model_objects[i]<- model
+      }
     }
   }#END of trial by trial loop
-  return(list(trial_all=trial_all,results_all=results_all,modinfo_all=modinfo_all))
+  if(saveModobj){
+    return(list(trial_all=trial_all,results_all=results_all, modinfo_all=modinfo_all, 
+              model_objects=model_objects))
+  }else{
+    return(list(trial_all=trial_all,results_all=results_all, modinfo_all=modinfo_all))
+  }
 }
