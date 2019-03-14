@@ -211,6 +211,11 @@ singleTrials<- function(dat=dat, ped=ped, trialvar='study', designvar='Design',
       Robjs<- lapply(Robjs, as.formula)
     }
     
+    #set blocks to to factors
+    trial$colB<- as.factor(trial$colB)
+    trial$rowB<- as.factor(trial$rowB)
+    trial$block<- as.factor(trial$block)
+    
     #----Fit models and save a list of objects
     modobjs<- list()
     numb<-0
