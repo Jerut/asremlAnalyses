@@ -41,8 +41,8 @@ singleTrials<- function(dat=dat, ped=ped, trialvar='study', designvar='Design',
     }else{ colnames(dat)[match(oldnm, colnames(dat))]<- newnm}
     return(dat)
   }
-
-
+  
+  
   #modify column names for rep, design, missing hill, and id variables
   dat<- modcol(dat, missingHillsvar, 'missinghills')
   dat<- modcol(dat, idvar, 'mgid')
@@ -57,7 +57,7 @@ singleTrials<- function(dat=dat, ped=ped, trialvar='study', designvar='Design',
   
   #add rowcoord variables as seperate columns if necessary, or rename them
   if(rowcoord_var==rowblk_var){
-    row<- as.character(dat[,'rowB'])
+    row<- dat[,'rowB']
     dat<- data.frame(dat, row)
   }else{
     dat<- modcol(dat, rowcoord_var, 'row')
@@ -77,6 +77,7 @@ singleTrials<- function(dat=dat, ped=ped, trialvar='study', designvar='Design',
   #remove imlausable values 
   if(length(which(dat$TOI<lwrlim))>0){dat[which(dat$TOI>uprlim),'TOI']<- NA}
   if(length(which(dat$TOI<lwrlim))>0){dat[which(dat$TOI<lwrlim),'TOI']<- NA}
+  
   
   #set asreml options
   asreml.options(maxit=100, pworkspace=pworkspace, workspace=workspace, aom=T)
@@ -98,7 +99,7 @@ singleTrials<- function(dat=dat, ped=ped, trialvar='study', designvar='Design',
     }else{
       trial<- droplevels.data.frame(dat) 
     }
-
+    
     #-------Fix the row-col coordinates if they exist
     hascoord<- TRUE
     if(length(na.omit(trial$row))>0 & length(na.omit(trial$col))>0){
@@ -155,14 +156,9 @@ singleTrials<- function(dat=dat, ped=ped, trialvar='study', designvar='Design',
       ainv<- asreml::ainverse(ped_sub)
       assign("ainv", ainv, envir = .GlobalEnv) 
     }
-
+    
     #set mgid to factor
     trial$mgid<- as.factor(trial$mgid)
-    
-    #convert blocks to factors
-    trial$rowB<- as.factor(as.character(trial$rowB))
-    trial$colB<- as.factor(as.character(trial$colB))
-    trial$block<- as.factor(as.character(trial$block))
     
     #-----assemble the fixed part of the formula
     fxobjs<- list()
@@ -331,7 +327,7 @@ singleTrials<- function(dat=dat, ped=ped, trialvar='study', designvar='Design',
   
   if(saveModobj){
     return(list(trial_all=trial_all,results_all=results_all, modinfo_all=modinfo_all, 
-              model_objects=model_objects))
+                model_objects=model_objects))
   }else{
     return(list(trial_all=trial_all,results_all=results_all, modinfo_all=modinfo_all))
   }
