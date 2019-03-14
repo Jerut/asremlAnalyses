@@ -69,11 +69,6 @@ singleTrials<- function(dat=dat, ped=ped, trialvar='study', designvar='Design',
     dat<- modcol(dat, colcoord_var, 'col')
   }
   
-  #convert blocks to factors
-  dat$rowB<- as.factor(as.character(dat$rowB))
-  dat$colB<- as.factor(as.character(dat$colB))
-  dat$block<- as.factor(as.character(dat$block))
-  
   #format phenotypic data
   TOI<- dat[,trait]
   dat<- data.frame(dat, TOI)
@@ -163,6 +158,10 @@ singleTrials<- function(dat=dat, ped=ped, trialvar='study', designvar='Design',
 
     #set mgid to factor
     trial$mgid<- as.factor(trial$mgid)
+    #convert blocks to factors
+    trial$rowB<- as.factor(as.character(trial$rowB))
+    trial$colB<- as.factor(as.character(trial$colB))
+    trial$block<- as.factor(as.character(trial$block))
     
     #-----assemble the fixed part of the formula
     fxobjs<- list()
