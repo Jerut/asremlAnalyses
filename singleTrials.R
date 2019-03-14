@@ -57,7 +57,7 @@ singleTrials<- function(dat=dat, ped=ped, trialvar='study', designvar='Design',
   
   #add rowcoord variables as seperate columns if necessary, or rename them
   if(rowcoord_var==rowblk_var){
-    row<- dat[,'rowB']
+    row<- as.character(dat[,'rowB'])
     dat<- data.frame(dat, row)
   }else{
     dat<- modcol(dat, rowcoord_var, 'row')
@@ -69,6 +69,11 @@ singleTrials<- function(dat=dat, ped=ped, trialvar='study', designvar='Design',
     dat<- modcol(dat, colcoord_var, 'col')
   }
   
+  #convert blocks to factors
+  dat$rowB<- as.factor(as.character(dat$rowB))
+  dat$colB<- as.factor(as.character(dat$colB))
+  dat$block<- as.factor(as.character(dat$block))
+  
   #format phenotypic data
   TOI<- dat[,trait]
   dat<- data.frame(dat, TOI)
@@ -77,7 +82,6 @@ singleTrials<- function(dat=dat, ped=ped, trialvar='study', designvar='Design',
   #remove imlausable values 
   if(length(which(dat$TOI<lwrlim))>0){dat[which(dat$TOI>uprlim),'TOI']<- NA}
   if(length(which(dat$TOI<lwrlim))>0){dat[which(dat$TOI<lwrlim),'TOI']<- NA}
-  
   
   #set asreml options
   asreml.options(maxit=100, pworkspace=pworkspace, workspace=workspace, aom=T)
