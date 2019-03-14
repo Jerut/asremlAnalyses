@@ -158,6 +158,7 @@ singleTrials<- function(dat=dat, ped=ped, trialvar='study', designvar='Design',
 
     #set mgid to factor
     trial$mgid<- as.factor(trial$mgid)
+    
     #convert blocks to factors
     trial$rowB<- as.factor(as.character(trial$rowB))
     trial$colB<- as.factor(as.character(trial$colB))
