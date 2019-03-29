@@ -196,7 +196,7 @@ singleTrials<- function(dat=dat, ped=ped, trialvar='study', designvar='Design',
       #if the design is alpha-lattice
       if(trial[1,'Design']=='Alpha-Lattice' | trial[1,'Design']=='Augmented Alpha-Lattice'){
         if(!rep_problem){
-          rndobjs[3]<-  paste(rndobjs[1], 'block:rep', sep="+")
+          rndobjs[length(rndobjs)+1]<-  paste(rndobjs[1], 'block:rep', sep="+")
         }
       }
     }
